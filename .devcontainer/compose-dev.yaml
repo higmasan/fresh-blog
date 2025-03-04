@@ -1,0 +1,13 @@
+services:
+
+  deno:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+    image: deno-dev:v0.1
+    container_name: deno-dev
+    volumes:
+      - ..:/work
+    working_dir: /work
+    tty: true
+    command: sleep infinity

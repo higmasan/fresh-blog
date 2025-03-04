@@ -1,0 +1,17 @@
+{
+    "name": "deno",
+    "dockerComposeFile": "./compose-dev.yaml",
+    "service": "deno",
+    "remoteUser": "denouser",
+    "workspaceFolder": "/work",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "denoland.vscode-deno",
+                "bradlc.vscode-tailwindcss",
+                "cweijan.vscode-database-client2",
+                "Postman.postman-for-vscode"
+            ]
+        }
+    }
+}
