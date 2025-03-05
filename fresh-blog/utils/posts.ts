@@ -2,7 +2,7 @@ import { join } from "$std/path/join.ts";
 import { extractYaml } from "@std/front-matter";
 import { exists } from "$std/fs/exists.ts";
 
-const DIRECTORY = "./posts";
+export const DIRECTORY = "./posts";
 
 export interface Post {
   slug: string;
