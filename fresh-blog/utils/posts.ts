@@ -1,8 +1,5 @@
-import { join } from "$std/path/join.ts";
-import { extractYaml } from "@std/front-matter";
-import { exists } from "$std/fs/exists.ts";
-
-export const DIRECTORY = "./posts";
+import { PostRepository } from "../db/repositories/post-repository.ts";
+import type { Post as DBPost } from "../db/models/post.ts";
 
 export interface Post {
   slug: string;
@@ -12,32 +9,40 @@ export interface Post {
   content: string;
 }
 
+function mapToPost(dbPost: DBPost): Post {
+  return {
+    slug: dbPost.slug,
+    title: dbPost.title,
+    publishedAt: dbPost.publishedAt,
+    snippet: dbPost.snippet,
+    content: dbPost.content,
+  };
+}
+
 export async function getPosts(): Promise<Post[]> {
-  const files = Deno.readDir(DIRECTORY);
-  const promises = [];
-  for await (const file of files) {
-    const slug = file.name.replace(".md", "");
-    promises.push(getPost(slug));
-  }
-  const results = await Promise.all(promises);
-  const posts = results.filter((post): post is Post => post !== null); 
-  posts.sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime());
-  return posts;
+  const posts = await PostRepository.findAll();
+  return posts.map(mapToPost);
 }
 
 export async function getPost(slug: string): Promise<Post | null> {
-  const filePath = join(DIRECTORY, `${slug}.md`);
-  if (!(await exists(filePath))) {
-    return null
-  }
+  const post = await PostRepository.findBySlug(slug);
+  return post ? mapToPost(post) : null;
+}
 
-  const text = await Deno.readTextFile(filePath);
-  const { attrs, body } = extractYaml<Post>(text);
-  return {
+export async function createPost(post: Omit<Post, "slug">): Promise<string> {
+  const now = new Date();
+  const timestamp = now.toISOString()
+    .replace('T', '-')
+    .replace(/:/g, '-')
+    .split('.')[0];
+  const randomString = Math.random().toString(36).substring(2, 8);
+  const slug = `${timestamp}-${randomString}`;
+
+  await PostRepository.create({
+    ...post,
     slug,
-    title: attrs.title,
-    publishedAt: new Date(attrs.publishedAt),
-    content: body,
-    snippet: attrs.snippet,
-  };
+    publishedAt: now,
+  });
+
+  return slug;
 }

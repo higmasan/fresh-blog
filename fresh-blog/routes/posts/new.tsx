@@ -1,8 +1,8 @@
 import { Handlers, PageProps } from "$fresh/server.ts";
 import { Head } from "$fresh/runtime.ts";
 import { CSS } from "jsr:@deno/gfm";
-import { join } from "$std/path/join.ts";
 import { render } from "jsr:@deno/gfm";
+import { createPost } from "../../utils/posts.ts";
 
 interface PreviewData {
   title: string;
@@ -55,37 +55,25 @@ export const handler: Handlers<{ preview: PreviewData | null; form: FormData | n
       return ctx.render({ preview: previewData, form: null });
     }
 
-    if (!isCreate) {
-      return ctx.render({
-        preview: null,
-        form: form
+    if (isCreate) {
+      const slug = await createPost({
+        title,
+        content,
+        snippet,
+        publishedAt: new Date(),
+      });
+
+      return new Response("", {
+        status: 303,
+        headers: {
+          Location: `/${slug}`,
+        },
       });
     }
 
-    const now = new Date();
-    const timestamp = now.toISOString()
-      .replace('T', '-')
-      .replace(/:/g, '-')
-      .split('.')[0];
-    const randomString = Math.random().toString(36).substring(2, 8);
-    const slug = `${timestamp}-${randomString}`;
-
-    const markdown = `---
-title: ${title}
-publishedAt: ${now.toISOString()}
-snippet: ${snippet}
----
-
-${content}`;
-
-    const filePath = join("./posts", `${slug}.md`);
-    await Deno.writeTextFile(filePath, markdown);
-
-    return new Response("", {
-      status: 303,
-      headers: {
-        Location: `/${slug}`,
-      },
+    return ctx.render({
+      preview: null,
+      form: form
     });
   },
 
