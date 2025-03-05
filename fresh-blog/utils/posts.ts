@@ -12,6 +12,19 @@ export interface Post {
   content: string;
 }
 
+export async function getPosts(): Promise<Post[]> {
+  const files = Deno.readDir(DIRECTORY);
+  const promises = [];
+  for await (const file of files) {
+    const slug = file.name.replace(".md", "");
+    promises.push(getPost(slug));
+  }
+  const results = await Promise.all(promises);
+  const posts = results.filter((post): post is Post => post !== null); 
+  posts.sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime());
+  return posts;
+}
+
 export async function getPost(slug: string): Promise<Post | null> {
   const filePath = join(DIRECTORY, `${slug}.md`);
   if (!(await exists(filePath))) {
