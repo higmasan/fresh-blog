@@ -15,9 +15,32 @@ export default function Home(props: PageProps<Post[]>) {
       <main className="max-w-screen-md px-4 pt-16 mx-auto">
         <h1 className="text-5xl font-bold">Blog</h1>
         <div className="mt-8">
-          {posts.map((post) => <h2>{post.title}</h2>)}
+          {posts.map((post) => <PostCard post={post} />)}
         </div>
       </main>
     </>
+  );
+}
+
+function PostCard(props: { post: Post }) {
+  const { post } = props;
+  return (
+    <div className="py-8 border-t border-gray-200)">
+      <a className="sm:col-span-2" href={`/${post.slug}`}>
+        <h3 className="text-3xl text-gray-900 font-bold">
+          {post.title}
+        </h3>
+        <time className="text-gray-500">
+          {new Date(post.publishedAt).toLocaleDateString("en-us", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })}
+        </time>
+        <div className="mt-4 text-gray-900">
+          {post.snippet}
+        </div>
+      </a>
+    </div>
   );
 }
