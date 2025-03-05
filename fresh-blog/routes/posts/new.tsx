@@ -3,7 +3,6 @@ import { Head } from "$fresh/runtime.ts";
 import { CSS } from "jsr:@deno/gfm";
 import { join } from "$std/path/join.ts";
 import { render } from "jsr:@deno/gfm";
-import DOMPurify from "https://esm.sh/dompurify@3.2.4";
 
 interface PreviewData {
   title: string;
@@ -25,7 +24,7 @@ function generatePreviewData(formData: FormData): Promise<PreviewData> {
     const title = formData.title;
     const snippet = formData.snippet;
     const content = formData.content;
-    const html = DOMPurify.sanitize(render(content));
+    const html = render(content);
     const now = new Date();
     const date = now.toISOString();
 
